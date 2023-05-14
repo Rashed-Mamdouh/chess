@@ -1,22 +1,88 @@
 import javax.swing.*;
 import java.awt.*;
+import java.io.*;
+import java.util.*;
+import java.util.List;
 
 public class score {
 
+
+   Map<String,Integer > playersData = new HashMap<>();
+
+
     JFrame frame = new JFrame();
-    JLabel player1 = new JLabel("MCarlsen");
-    JLabel player2 = new JLabel("GKasparov");
-    JLabel player3 = new JLabel("BFischer");
-    JLabel player4 = new JLabel("BethHarmon");
-    JLabel score1 = new JLabel("1433");
-    JLabel score2 = new JLabel("1380");
-    JLabel score3 = new JLabel("1130");
-    JLabel score4 = new JLabel("900");
-
+    JLabel player1;
+    JLabel player2;
+    JLabel player3 ;
+    JLabel player4 ;
+    JLabel score1 ;
+    JLabel score2 ;
+    JLabel score3 ;
+    JLabel score4 ;
     JButton backButton = new JButton("Back");
-    public score(){
+    public score(String player1Name,String player2Name,boolean firstplayerwon){
 
 
+        playersData=new HashMap<>();
+        try (BufferedReader reader = new BufferedReader(new FileReader("playersData.txt"))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                String[] parts = line.split(",");
+                if (parts.length == 2) {
+                    String name = parts[0];
+                    int score = Integer.parseInt(parts[1]);
+                    playersData.put(name, score);
+                }
+            }
+        } catch (IOException e) {
+            System.err.println("Failed to read from file: " + e.getMessage());
+        }
+
+        if(firstplayerwon) {
+            if (playersData.containsKey(player1Name)) {
+                playersData.put(player1Name, playersData.get(player1Name) + 10);
+            } else {
+                playersData.put(player1Name, 10);
+            }
+            if (playersData.containsKey(player2Name)) {
+                playersData.put(player2Name, playersData.get(player2Name));
+            } else {
+                playersData.put(player2Name, 0);
+
+            }
+        }
+        else{
+            if (playersData.containsKey(player2Name)) {
+                playersData.put(player2Name, playersData.get(player2Name) + 10);
+            } else {
+                playersData.put(player2Name, 10);
+            }
+            if (playersData.containsKey(player1Name)) {
+                playersData.put(player1Name, playersData.get(player1Name));
+            } else {
+                playersData.put(player1Name, 0);
+
+            }
+        }
+
+
+       List<Map.Entry<String, Integer>> list = new ArrayList<>(playersData.entrySet());
+
+        Collections.sort(list, new Comparator<Map.Entry<String, Integer>>() {
+            public int compare(Map.Entry<String, Integer> o1, Map.Entry<String, Integer> o2) {
+                return o2.getValue().compareTo(o1.getValue());
+            }
+        });
+
+
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter("playersData.txt"))) {
+            for (Map.Entry<String, Integer> entry : list) {
+                writer.write(entry.getKey() + "," + entry.getValue());
+                writer.newLine();
+            }
+        } catch (IOException e) {
+            System.err.println("Failed to write to file: " + e.getMessage());
+        }
         frame.setTitle("Chess game");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setResizable(false);
@@ -24,6 +90,41 @@ public class score {
         frame.setVisible(true);
         ImageIcon icon = new ImageIcon("logo.jpg");
         frame.setIconImage(icon.getImage());
+
+
+        player1 = new JLabel("-");
+        score1 = new JLabel("0");
+        player2 = new JLabel("-");
+        score2 = new JLabel("0");
+        player3 = new JLabel("-");
+        score3 = new JLabel("0");
+        player4 = new JLabel("-");
+        score4 = new JLabel("0");
+
+        int i=1;
+
+        for(Map.Entry<String,Integer> e: list){
+            if(i==1){
+                player1 = new JLabel(e.getKey());
+                score1 = new JLabel(String.valueOf(e.getValue()));
+            }
+            else if(i==2){
+                player2 = new JLabel(e.getKey());
+                score2 = new JLabel(String.valueOf(e.getValue()));
+            }
+            else if(i==3){
+                player3 = new JLabel(e.getKey());
+                score3 = new JLabel(String.valueOf(e.getValue()));
+            }
+            else if(i==4){
+                player4 = new JLabel(e.getKey());
+                score4 = new JLabel(String.valueOf(e.getValue()));
+            }
+            i++;
+        }
+
+
+
 
         player1.setBounds(295,275,170,100);
         player1.setForeground(Color.white);
@@ -71,12 +172,14 @@ public class score {
         backButton.setBackground(new Color(72,133,174));
         frame.add(backButton);
 
-        ImageIcon background = new ImageIcon("score.png");
+        ImageIcon background = new ImageIcon("logo.jpg");
         background.setImage(background.getImage().getScaledInstance(700, 550, Image.SCALE_SMOOTH));
         JLabel back = new JLabel(background);
         back.setBounds(0, 0, 700, 550);
         frame.add(back);
         frame.setVisible(true);
     }
+
+
 
 }
