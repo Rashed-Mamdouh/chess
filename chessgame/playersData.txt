@@ -1,0 +1,4 @@
+Rashed,30
+Mohamed,10
+Ali,10
+Osama,0
